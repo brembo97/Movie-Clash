@@ -18,5 +18,8 @@ const fetchData = async searchInput => {
             s: searchInput
         }
     })
+
+    if(response.data.Error) return [];
+    
     return response.data.Search;
 }
