@@ -71,10 +71,54 @@ const onMovieSelect = async (movie, summaryDiv, side) => {
 }
 
 const compareStats = () => {
-    console.log("COMPARING....");
+    const leftStats = document.querySelectorAll("#summary-left .notification");
+    const rightStats = document.querySelectorAll("#summary-right .notification");
+
+    leftStats.forEach((leftStat, index) => {
+        const rightStat = rightStats[index];
+
+        const leftValue = parseFloat(
+            Math.round(leftStat.dataset.value * 100) / 100
+            );
+        const rightValue = parseFloat(
+            Math.round(rightStat.dataset.value * 100) / 100
+            );
+
+        //Change color of loser and winner movie feature
+        if(leftValue > rightValue){
+            leftStat.classList.remove('is-danger');
+            leftStat.classList.add('is-active');
+
+            rightStat.classList.remove('is-active');
+            rightStat.classList.add('is-danger');
+        }
+        else if(leftValue < rightValue){
+            rightStat.classList.remove('is-danger');
+            rightStat.classList.add('is-active');
+
+            leftStat.classList.remove('is-active');
+            leftStat.classList.add('is-danger');
+        }
+    })
 }
 
+//Select relevant movie data from API response and return HTML structure
 const movieTemplate = movieDetails => {
+    const awards = movieDetails.Awards.split(' ').reduce((acc, curr) => {
+        let value = parseInt(curr);
+
+        if(isNaN(value)) return acc;
+
+        else return acc + value;
+    }, 0);
+
+    const [,{Value: tomatoes}] = movieDetails.Ratings
+
+    const tomatoeRating = parseInt(tomatoes.replace(/%/g, ''))
+    const metascore = parseInt(movieDetails.Metascore);
+    const imdbRating = parseFloat(movieDetails.imdbRating);
+    const imdbVotes = parseInt(movieDetails.imdbVotes.replace(/,/g, ''));
+
     return `
         <article class="media">
             <figure class="media-left">
@@ -90,23 +134,23 @@ const movieTemplate = movieDetails => {
                 </div>
             </div>
         </article>
-        <article class="notification is-primary">
+        <article data-value=${awards} class="notification is-primary">
             <p class="title">${movieDetails.Awards}</p>
             <p class="subtitle">Awards</p>
         </article>
-        <article class="notification is-primary">
-            <p class="title">${movieDetails.BoxOffice}</p>
-            <p class="subtitle">Box Office</p>
+        <article data-value=${tomatoeRating} class="notification is-primary">
+            <p class="title">${tomatoes}</p>
+            <p class="subtitle">Rotten Tomatoes</p>
         </article>
-        <article class="notification is-primary">
+        <article data-value=${metascore} class="notification is-primary">
             <p class="title">${movieDetails.Metascore}</p>
             <p class="subtitle">Metascore</p>
         </article>
-        <article class="notification is-primary">
+        <article data-value=${imdbRating} class="notification is-primary">
             <p class="title">${movieDetails.imdbRating}</p>
             <p class="subtitle">IMDB Rating</p>
         </article>
-        <article class="notification is-primary">
+        <article data-value=${imdbVotes} class="notification is-primary">
             <p class="title">${movieDetails.imdbVotes}</p>
             <p class="subtitle">IMDB Votes</p>
         </article>
